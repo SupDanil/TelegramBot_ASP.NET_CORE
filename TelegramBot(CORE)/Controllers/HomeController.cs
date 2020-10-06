@@ -14,11 +14,12 @@ namespace TelegramBot_CORE_.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private TelegramBotClient _teleBot;
+        private string MassegeBot;
+        private string UserName;
 
-        public HomeController(ILogger<HomeController> logger,TelegramBotClient telegram)
+        public HomeController(ILogger<HomeController> logger)
         {
-            _logger = logger;
-            _teleBot = telegram;
+            _logger = logger;  
         }
 
         public IActionResult Index()
@@ -27,9 +28,23 @@ namespace TelegramBot_CORE_.Controllers
 
             ViewData["NameOfBot"] = _teleBot.GetMeAsync().Result; // ПОЛУЧАЕМ ИМЯ БОТА
 
+            _teleBot.StartReceiving(); /*СЛУШАЕМ СООБЩЕНИЯ ОТ СЕРВЕРА ТЕЛЕГРАМА ЕСЛИ ОНИ ПОСТУПЯТ*/
+
+            _teleBot.OnMessage += TeleBotReceived; // СОЗДАЕМ СОБЫТИЕ ПРИ ПОЛУЧЕНИИ СООБЩЕНИЯ 
+
+            ViewData["BotMassage"] = MassegeBot;
+
+
             return View();
         }
 
+        private void TeleBotReceived(object sender, Telegram.Bot.Args.MessageEventArgs e) // САМО СОБЫТИЕ ПРИ ПОЛУЧЕНИИ СООБЩЕНИЯ 
+        {
+           var BotContext =  e.Message; // СОЗДАЕМ КОНТЕКТ ДЛЯ РАБОТЫ С ВХОДЯЩИМИ СООБЩЕНИЯМИ  e.Message
 
+            string User = $"{BotContext.From.FirstName} {BotContext.From.LastName}"; // ПОЛУЧАЕМ ИМЯ И ФАМИЛИЮ ПОЛЬЗОВАТЕЛЯ BotContext.From.FirstName
+
+            MassegeBot = BotContext.Text;  // ПОЛУЧАЕМ СООБЩЕНИЯ ПОЛЬЗОВАТЕЛЯ BotContext.Text
+        }
     }
 }
